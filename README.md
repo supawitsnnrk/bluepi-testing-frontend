@@ -66,7 +66,7 @@ npm -v    # ควรเป็น v9 ขึ้นไป
 
 ### 1️⃣ Clone โปรเจค
 ```bash
-git clone <repository-url>
+git clone https://github.com/supawitsnnrk/bluepi-testing-frontend.git
 cd bluepi-testing-frontend
 ```
 
@@ -300,20 +300,6 @@ curl http://localhost:9000/api/products
 
 ---
 
-## 🎓 Code Quality
-
-โปรเจคนี้มีการ refactor แล้ว มี:
-- ✅ Component-based architecture
-- ✅ Custom hooks (useModal)
-- ✅ Helper functions (DRY principle)
-- ✅ TypeScript strict mode
-- ✅ Parallel API fetching (Promise.all)
-- ✅ Error handling ครบถ้วน
-
-**Code Score: 8.5/10** ⭐⭐⭐⭐⭐
-
----
-
 ## 📝 License
 
 MIT License - ใช้งานได้อย่างอิสระ
@@ -328,14 +314,6 @@ MIT License - ใช้งานได้อย่างอิสระ
 3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. เปิด Pull Request
-
----
-
-## 📞 Support
-
-หากมีปัญหาหรือข้อสงสัย:
-- 📧 Email: [your-email@example.com]
-- 💬 Issues: [GitHub Issues](link-to-issues)
 
 ---
 

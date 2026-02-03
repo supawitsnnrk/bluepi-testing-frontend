@@ -7,6 +7,7 @@ import type {
   CreateOrderResponse,
   DepositCashRequest,
   DepositCashResponse,
+  PurchaseResponse,
   SelectProductResponse,
 } from "../shared/types/order";
 
@@ -14,19 +15,6 @@ import type {
 interface BackendResponse<T> {
   statusCode: number;
   data: T;
-}
-
-// Response types
-interface PurchaseRequest {
-  productId: string | number;
-  amount: number;
-}
-
-interface PurchaseResponse {
-  success: boolean;
-  message: string;
-  change: number;
-  product: Product;
 }
 
 // Vending Service
@@ -40,25 +28,6 @@ const vendingService = {
       return response.data.data;
     } catch (error) {
       console.error("Error fetching products:", error);
-      throw error;
-    }
-  },
-
-  // Purchase a product
-  purchaseProduct: async (
-    productId: string | number,
-    amount: number,
-  ): Promise<PurchaseResponse> => {
-    try {
-      const response = await axiosInstance.post<
-        BackendResponse<PurchaseResponse>
-      >(API_ENDPOINTS.PURCHASE, {
-        productId,
-        amount,
-      } as PurchaseRequest);
-      return response.data.data;
-    } catch (error) {
-      console.error("Error purchasing product:", error);
       throw error;
     }
   },
