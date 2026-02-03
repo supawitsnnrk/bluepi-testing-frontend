@@ -306,19 +306,6 @@ MIT License - ใช้งานได้อย่างอิสระ
 
 ---
 
-## 👥 Contributing
-
-ถ้าอยากช่วยพัฒนา:
-1. Fork repository
-2. สร้าง feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. เปิด Pull Request
-
----
-
-**Made with ❤️ by BluePi Team**
-
 import reactDom from 'eslint-plugin-react-dom'
 
 export default defineConfig([
