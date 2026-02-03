@@ -7,6 +7,7 @@ interface ProductCardProps {
   product: ProductAndStock;
   index: number;
   isSelected: boolean;
+  isProcessing?: boolean;
   onSelect: (product: ProductAndStock) => void;
 }
 
@@ -14,13 +15,14 @@ const ProductCard = ({
   product,
   index,
   isSelected,
+  isProcessing = false,
   onSelect,
 }: ProductCardProps) => {
   const totalStock = (product.productStock as ProductStock)?.quantity || 0;
   const isOutOfStock = totalStock === 0;
 
   const handleClick = () => {
-    if (!isOutOfStock) {
+    if (!isOutOfStock && !isProcessing) {
       onSelect(product);
     }
   };
@@ -29,7 +31,7 @@ const ProductCard = ({
     <div
       onClick={handleClick}
       className={`bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 transition-all duration-300 border-4 ${
-        isOutOfStock
+        isOutOfStock || isProcessing
           ? "opacity-50 cursor-not-allowed border-gray-300"
           : "cursor-pointer hover:scale-105 hover:shadow-xl"
       } ${

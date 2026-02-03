@@ -6,6 +6,7 @@ interface PaymentPanelProps {
   selectedProduct: ProductAndStock | null;
   denominations: Denominations[];
   isDispensing: boolean;
+  isProcessing: boolean;
   onDepositCash: (denominationId: string) => void;
   onPurchase: () => void;
   onCancel: () => void;
@@ -16,6 +17,7 @@ const PaymentPanel = ({
   selectedProduct,
   denominations,
   isDispensing,
+  isProcessing,
   onDepositCash,
   onPurchase,
   onCancel,
@@ -89,7 +91,8 @@ const PaymentPanel = ({
             <button
               key={denom.id}
               onClick={() => onDepositCash(denom.id)}
-              className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+              disabled={isProcessing}
+              className="bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
             >
               ฿{denom.amount.toFixed(2)}
             </button>
@@ -101,14 +104,14 @@ const PaymentPanel = ({
       <div className="space-y-3">
         <button
           onClick={onPurchase}
-          disabled={!selectedProduct || isDispensing}
+          disabled={!selectedProduct || isProcessing}
           className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
         >
           {isDispensing ? "🔄 Dispensing..." : "Purchase"}
         </button>
         <button
           onClick={onCancel}
-          disabled={isDispensing}
+          disabled={isProcessing}
           className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
         >
           Cancel

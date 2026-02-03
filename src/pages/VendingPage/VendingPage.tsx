@@ -23,9 +23,16 @@ const VendingPage = () => {
   const [isDispensing, setIsDispensing] = useState(false);
   const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
   const [isSelectingProduct, setIsSelectingProduct] = useState(false);
+  const [isDepositingCash, setIsDepositingCash] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Modal hook
   const { modal, showModal, closeModal } = useModal();
+
+  // Check if any action is in progress
+  const isProcessing =
+    isDispensing || isSelectingProduct || isDepositingCash || isCanceling;
 
   // Helper: Decrease product stock by 1
   const decreaseProductStock = (productId: string) => {
@@ -115,6 +122,9 @@ const VendingPage = () => {
       return showModal("No active transaction to cancel.", "info", "Info");
     }
 
+    if (isCanceling) return; // Prevent double click
+
+    setIsCanceling(true);
     try {
       const cancelResponse = await vendingService.cancelOrder(currentOrderId);
 
@@ -134,10 +144,15 @@ const VendingPage = () => {
         "error",
         "Error",
       );
+    } finally {
+      setIsCanceling(false);
     }
   };
 
   const depositCash = async (denominationId: string) => {
+    if (isDepositingCash) return; // Prevent double click
+
+    setIsDepositingCash(true);
     try {
       const depositRequest: DepositCashRequest = {
         denominationId,
@@ -155,6 +170,8 @@ const VendingPage = () => {
     } catch (error) {
       console.error("Error depositing cash:", error);
       showModal("Failed to deposit cash. Please try again.", "error", "Error");
+    } finally {
+      setIsDepositingCash(false);
     }
   };
 
@@ -225,6 +242,7 @@ const VendingPage = () => {
     let isMounted = true;
 
     const fetchInitialData = async () => {
+      setIsLoading(true);
       try {
         // Fetch products and denominations in parallel
         const [productsData, denominationsData] = await Promise.all([
@@ -254,6 +272,10 @@ const VendingPage = () => {
           "error",
           "Error",
         );
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -275,64 +297,77 @@ const VendingPage = () => {
           <p className="text-gray-600 text-lg">Select your favorite products</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Products Display */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-3xl shadow-2xl p-8 border-8 border-gray-800">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <span>🛒</span> Available Products
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {products.map((product, index) => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    index={index}
-                    isSelected={selectedProduct?.id === product.id}
-                    onSelect={handleSelectProduct}
-                  />
-                ))}
-              </div>
-              {/* Selection Action */}
-              {selectedProduct && (
-                <div className="mt-6 bg-blue-50 rounded-xl p-6 border-2 border-blue-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <p className="text-sm text-gray-600">Selected:</p>
-                        <p className="font-bold text-xl text-gray-800">
-                          {selectedProduct.name}
-                        </p>
-                        <p className="text-green-600 font-semibold">
-                          ฿{selectedProduct.price.toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={cancelTransaction}
-                      className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-200"
-                    >
-                      Clear
-                    </button>
-                  </div>
-                </div>
-              )}
+        {/* Loading State */}
+        {isLoading ? (
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 text-lg">Loading products...</p>
             </div>
           </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Products Display */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-3xl shadow-2xl p-8 border-8 border-gray-800">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                  <span>🛒</span> Available Products
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {products.map((product, index) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      index={index}
+                      isSelected={selectedProduct?.id === product.id}
+                      isProcessing={isProcessing}
+                      onSelect={handleSelectProduct}
+                    />
+                  ))}
+                </div>
+                {/* Selection Action */}
+                {selectedProduct && (
+                  <div className="mt-6 bg-blue-50 rounded-xl p-6 border-2 border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <p className="text-sm text-gray-600">Selected:</p>
+                          <p className="font-bold text-xl text-gray-800">
+                            {selectedProduct.name}
+                          </p>
+                          <p className="text-green-600 font-semibold">
+                            ฿{selectedProduct.price.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={cancelTransaction}
+                        disabled={isProcessing}
+                        className="bg-gray-400 hover:bg-gray-500 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all duration-200"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
 
-          {/* Payment Panel */}
-          <div className="lg:col-span-1">
-            <PaymentPanel
-              insertedMoney={insertedMoney}
-              selectedProduct={selectedProduct}
-              denominations={denominations}
-              isDispensing={isDispensing}
-              onDepositCash={depositCash}
-              onPurchase={purchaseOrder}
-              onCancel={cancelTransaction}
-            />
+            {/* Payment Panel */}
+            <div className="lg:col-span-1">
+              <PaymentPanel
+                insertedMoney={insertedMoney}
+                selectedProduct={selectedProduct}
+                denominations={denominations}
+                isDispensing={isDispensing}
+                isProcessing={isProcessing}
+                onDepositCash={depositCash}
+                onPurchase={purchaseOrder}
+                onCancel={cancelTransaction}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Modal */}
